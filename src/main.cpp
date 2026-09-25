@@ -11,7 +11,7 @@
 #include <Wire.h>
 #include <AS5600.h>
 
-// create helper objects
+// create helper objects 
 AS5600 as5600;
 
 // pin definitions
@@ -53,6 +53,8 @@ float target = 90.0;
 float kp = 2.5;
 float kd = 0.7;
 float ki = 5.0;
+float kpMom = 3.5;
+float kdMom = 0.2;
 
 // function that allows users to change the target and PID values while the program runs.
 // users enter the shortened variable name followed by a colon and a value, so "t:180.0" or "kp:3.0" for example.
@@ -84,7 +86,6 @@ void checkSerialCommand() {
     currentState = STATE_TARGETING;
     targetTimerOn = true;
     targetTimer = millis();
-
   } else if (key == "kp") { 
     kp = value; 
   } else if (key == "kd") {
@@ -93,6 +94,10 @@ void checkSerialCommand() {
     ki = value; 
   } else if (key == "kg") { 
     kG = value; 
+  } else if (key == "kpmom") {
+    kpMom = value;
+  } else if (key == "kdmom") {
+    kdMom = value;
   } else {
     Serial.print("Unknown key: "); Serial.println(key);
     return;
@@ -278,7 +283,7 @@ void loop() {
         currentState = STATE_MOMENTUM;
         stateTimer = millis();
 
-        //checks quadrant the arm is in so it knows the opposite way to go aroung
+        //checks quadrant the arm is in so it knows the opposite way to go around
         if (currAngleDegrees > 0.0 && currAngleDegrees < 180.0) {
           momDir = -1;
         } else {
@@ -296,8 +301,6 @@ void loop() {
     case STATE_MOMENTUM: {
       // variable declaration
       const float captureBand = 50.0;
-      const float kpMom = 3.5;
-      const float kdMom = 0.2;
 
       // finds shortest distance to 180, and applies a sign change so the arm goes the other, longer way
       float distanceToUpright = 180.0 - currAngleDegrees;
